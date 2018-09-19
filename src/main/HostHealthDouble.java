@@ -45,6 +45,7 @@ public class HostHealthDouble {
 		int customPort = cf.getSinglefValue("custom_port");
 		String customServiceName = cf.getSingleString("custom_service_name");
 		String sql = cf.getSingleString("get_host_sql");
+		int agentTimeout = cf.getSinglefValue("agent_delay_timeout_second");
 		if (customServiceName == null) {
 			LOG.error("customServiceName is empty");
 			System.exit(0);
@@ -55,7 +56,8 @@ public class HostHealthDouble {
 
 		for (int thNo = 1; thNo <= thAll; thNo++) {
 			Callable callable = new Worker(thNo, thAll, rdbUrl, rdbUser,
-					rdbPasswd, agentPort, customPort, customServiceName, sql);
+					rdbPasswd, agentPort, customPort, customServiceName, sql,
+					agentTimeout);
 			Future future = pool.submit(callable);
 			set.add(future);
 		}

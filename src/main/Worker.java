@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
+import util.ASao;
 import util.RDao;
 import util.Sock;
 
@@ -24,10 +25,11 @@ public class Worker implements Callable<Boolean> {
 	int customPort;
 	String customServiceName;
 	String sql;
+	int agentTimeout;
 
 	public Worker(int thNo, int thAll, String rdbUrl, String rdbUser,
 			String rdbPasswd, int agentPort, int customPort,
-			String customServiceName, String sql) {
+			String customServiceName, String sql, int agentTimeout) {
 		this.thNo = thNo;
 		this.thAll = thAll;
 		this.rdbUrl = rdbUrl;
@@ -36,7 +38,8 @@ public class Worker implements Callable<Boolean> {
 		this.agentPort = agentPort;
 		this.customPort = customPort;
 		this.customServiceName = customServiceName;
-		this.sql=sql;
+		this.sql = sql;
+		this.agentTimeout = agentTimeout;
 	}
 
 	@Override
@@ -44,11 +47,17 @@ public class Worker implements Callable<Boolean> {
 		RDao rDao = new RDao();
 		Connection conn = rDao.getConnection(rdbUrl, rdbUser, rdbPassword);
 		HashMap<String, String> hostKVstatus = new HashMap<String, String>();
-		ArrayList<String> hosts = rDao.getHostsMT(conn, thNo-1, thAll,
+		ArrayList<String> hosts = rDao.getHostsMT(conn, thNo - 1, thAll,
 				hostKVstatus, customServiceName, sql);
+		// ArrayList<String> hosts = rDao.getHostsTest(conn);
+		HashMap<String, Boolean> isV3 = rDao.getV3Info(conn);
+
 		int i = 0;
 		Sock sock = new Sock();
 		DateTime start = new DateTime();
+
+		ASao asao = new ASao();
+
 		for (String host : hosts) {
 			LOG.trace(thNo + "-" + i + ":Checking:" + host);
 			boolean bPing = sock.isPingWorking(host);
@@ -74,29 +83,56 @@ public class Worker implements Callable<Boolean> {
 				}
 			}
 
-			boolean bAgent = sock.isPortWorking(host, agentPort);
-			LOG.info("agent_try1:" + bAgent);
-			if (!bAgent) {
-				Thread.sleep(1000);
+			boolean bAgent = false;
+			if (isV3.containsKey(host) && isV3.get(host)) {
+				bAgent = asao.isWorking(host, agentPort, agentTimeout);
+				LOG.info("agent_try1:" + bAgent);
+				if (!bAgent) {
+					Thread.sleep(1000);
+					bAgent = asao.isWorking(host, agentPort, agentTimeout);
+					LOG.info("agent_try2:" + bAgent);
+					if (!bAgent) {
+						Thread.sleep(1000);
+						bAgent = asao.isWorking(host, agentPort, agentTimeout);
+						LOG.info("agent_try3:" + bAgent);
+						if (!bAgent) {
+							Thread.sleep(1000);
+							bAgent = asao.isWorking(host, agentPort,
+									agentTimeout);
+							LOG.info("agent_try4:" + bAgent);
+							if (!bAgent) {
+								Thread.sleep(1000);
+								bAgent = asao.isWorking(host, agentPort,
+										agentTimeout);
+								LOG.info("agent_try5:" + bAgent);
+							}
+						}
+					}
+				}
+			} else {
 				bAgent = sock.isPortWorking(host, agentPort);
-				LOG.info("agent_try2:" + bAgent);
+				LOG.info("agent_try1:" + bAgent);
 				if (!bAgent) {
 					Thread.sleep(1000);
 					bAgent = sock.isPortWorking(host, agentPort);
-					LOG.info("agent_try3:" + bAgent);
+					LOG.info("agent_try2:" + bAgent);
 					if (!bAgent) {
 						Thread.sleep(1000);
 						bAgent = sock.isPortWorking(host, agentPort);
-						LOG.info("agent_try4:" + bAgent);
+						LOG.info("agent_try3:" + bAgent);
 						if (!bAgent) {
 							Thread.sleep(1000);
 							bAgent = sock.isPortWorking(host, agentPort);
-							LOG.info("agent_try5:" + bAgent);
+							LOG.info("agent_try4:" + bAgent);
+							if (!bAgent) {
+								Thread.sleep(1000);
+								bAgent = sock.isPortWorking(host, agentPort);
+								LOG.info("agent_try5:" + bAgent);
+							}
 						}
 					}
 				}
 			}
-
 			boolean bCustom = sock.isPortWorking(host, customPort);
 			LOG.info(customServiceName + "_try1:" + bCustom);
 			if (!bCustom) {
