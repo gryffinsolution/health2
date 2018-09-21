@@ -49,7 +49,7 @@ public class Worker implements Callable<Boolean> {
 		HashMap<String, String> hostKVstatus = new HashMap<String, String>();
 		ArrayList<String> hosts = rDao.getHostsMT(conn, thNo - 1, thAll,
 				hostKVstatus, customServiceName, sql);
-		// ArrayList<String> hosts = rDao.getHostsTest(conn);
+		// ArrayList<String> hosts = rDao.getHostsTest();
 		HashMap<String, Boolean> isV3 = rDao.getV3Info(conn);
 
 		int i = 0;
