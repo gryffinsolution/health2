@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<host_up_check>
+	<main_db_type>PostgreSQL</main_db_type>
+	<main_db_url>jdbc:postgresql://localhost:5432/mapledb</main_db_url>
+	<user>pipedpiper47</user>
+	<password>catallena7</password>
+	<!-- <main_db_type>Oracle</main_db_type> -->
+	<!--<main_db_url>jdbc:oracle:thin:@12.34.56.78:1521:flogdb</main_db_url> -->
+	<agent_port>33783</agent_port>
+	<no_of_thread>1</no_of_thread>
+</host_up_check>
