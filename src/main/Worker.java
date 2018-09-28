@@ -201,6 +201,7 @@ public class Worker implements Callable<Boolean> {
 			if (!status.matches("unknown"))
 				rDao.updateStatus(conn, host, status, flgSysdate);
 			i++;
+			
 		}
 		rDao.setWorkingTimestamp(conn, rdbUrl, thNo);
 		DateTime end = new DateTime();
