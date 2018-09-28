@@ -37,6 +37,7 @@ public class ASao {
 					content.append(System.lineSeparator());
 				}
 			}
+
 			LOG.info(content.toString());
 			con.disconnect();
 			String retStr = content.toString();
