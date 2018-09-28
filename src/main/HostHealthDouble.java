@@ -28,7 +28,6 @@ public class HostHealthDouble {
 	}
 
 	public static void main(String[] args) {
-
 		Conf cf = new Conf();
 		if (args.length != 0 && args[0] != null) {
 			cf.setConfFile(args[0]);
